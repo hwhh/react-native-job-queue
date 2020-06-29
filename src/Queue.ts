@@ -219,6 +219,7 @@ export class Queue {
             return;
         }
         const nextJob = await this.jobStore.getNextJob();
+        console.log('nextJob: ', nextJob)
         if (this.isJobNotEmpty(nextJob)) {
             const nextJobs = await this.getJobsForWorker(nextJob.workerName);
             const processingJobs = nextJobs.map(async (job) => this.limitExecution(this.excuteJob, job));
