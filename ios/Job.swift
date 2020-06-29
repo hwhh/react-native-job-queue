@@ -263,7 +263,7 @@ extension SQLiteDatabase {
                sqlite3_finalize(updateStatement)
            }
 
-           guard (sqlite3_bind_text(updateStatement, 1,job.executionTime,-1,nil) == SQLITE_OK &&
+           guard (sqlite3_bind_text(updateStatement, 1,job.executionTime.utf8String,-1,nil) == SQLITE_OK &&
                   sqlite3_bind_text(updateStatement, 2, job.id.utf8String,-1,nil) == SQLITE_OK
                ) else {
                    throw SQLiteError.Bind(message: errorMessage)
