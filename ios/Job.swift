@@ -40,7 +40,7 @@ extension Job: SQLTable {
                    attempts: job["attempts"] as! Int32,
                    created: job["created"] as! NSString,
                    executionTime: job["executionTime"] as! NSString,
-                   created: job["created"] as! NSString
+                   created: job["created"] as! NSString,
                    failed: job["failed"] as! NSString,
                    timeout: job["timeout"] as! Int32,
                    priority: job["timeout"] as! Int32)
