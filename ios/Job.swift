@@ -9,6 +9,7 @@ struct Job {
     var metaData: NSString
     var attempts: Int32
     var created: NSString
+    var executionTime: NSString
     var failed: NSString
     var timeout: Int32
     var priority: Int32
@@ -40,7 +41,6 @@ extension Job: SQLTable {
                    attempts: job["attempts"] as! Int32,
                    created: job["created"] as! NSString,
                    executionTime: job["executionTime"] as! NSString,
-                   created: job["created"] as! NSString,
                    failed: job["failed"] as! NSString,
                    timeout: job["timeout"] as! Int32,
                    priority: job["timeout"] as! Int32)
@@ -289,13 +289,15 @@ extension SQLiteDatabase {
             let attempts=sqlite3_column_int(sqlStatement, 5)
             let createdColumnContent = sqlite3_column_text(sqlStatement, 6)
             let created = String(cString: createdColumnContent!) as NSString
+
             let executionTimeColumnContent = sqlite3_column_text(sqlStatement, 7)
             let executionTime = String(cString: executionTimeColumnContent!) as NSString
+
             let failedColumnContent = sqlite3_column_text(sqlStatement, 9)
             let failed = String(cString: failedColumnContent!) as NSString
             let timeout=sqlite3_column_int(sqlStatement, 9)
             let priority=sqlite3_column_int(sqlStatement, 10)
-            return Job(id: id, workerName: workerName,active:active,payload:payload,metaData: metaData,attempts: attempts,created: created, executionTimeL executionTime, failed: failed,timeout: timeout,priority: priority)
+            return Job(id: id, workerName: workerName,active:active,payload:payload,metaData: metaData,attempts: attempts,created: created, executionTime: executionTime, failed: failed,timeout: timeout,priority: priority)
         }else{
             return nil
         }
