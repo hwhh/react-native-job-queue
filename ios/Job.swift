@@ -253,7 +253,7 @@ extension SQLiteDatabase {
     }
 
 
-    func updateExecutionTime(job: Job) throws{
+    func updateJobExecutionTime(job: Job) throws{
            let querySql = "UPDATE job SET executionTime = ? WHERE id = ?;"
            guard let updateStatement = try? prepareStatement(sql: querySql) else {
                throw SQLiteError.Prepare(message: errorMessage)
@@ -263,7 +263,8 @@ extension SQLiteDatabase {
                sqlite3_finalize(updateStatement)
            }
 
-           guard (sqlite3_bind_int(updateStatement, 1, job.executionTime) == SQLITE_OK
+           guard (sqlite3_bind_text(updateStatement, 1,job.executionTime,-1,nil) == SQLITE_OK &&
+                  sqlite3_bind_text(updateStatement, 2, job.id.utf8String,-1,nil) == SQLITE_OK
                ) else {
                    throw SQLiteError.Bind(message: errorMessage)
            }

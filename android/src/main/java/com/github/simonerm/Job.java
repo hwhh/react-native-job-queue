@@ -27,6 +27,8 @@ public class Job {
 
     private String created;
 
+    private String executionTime;
+
     private int timeout;
 
     private int priority;
@@ -112,4 +114,14 @@ public class Job {
     public void setMetaData(String metaData) {
         this.metaData = metaData;
     }
+
+    public void setExecutionTime(String executionTime) {
+        this.executionTime = executionTime;
+    }
+
+    public String getExecutionTime() {
+        return this.executionTime;
+    }
+
+
 }

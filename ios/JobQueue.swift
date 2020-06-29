@@ -67,10 +67,10 @@ public class JobQueue:NSObject{
     }
 
     @objc
-   public func updateExecutionTime(_ job:[String:Any]){
+   public func updateJobExecutionTime(_ job:[String:Any]){
        if(db != nil){
            do{
-               try db?.updateExecutionTime(job: Job.createJobFromDictionary(job: job))
+               try db?.updateJobExecutionTime(job: Job.createJobFromDictionary(job: job))
            }catch{
                print("Couln't update job Job to Database: ",error)
            }

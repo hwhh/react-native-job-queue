@@ -166,9 +166,15 @@ export class Queue {
         }
     }
 
-    updateJob(rawJob: RawJob){
-        //1. check if the job is already running;
-        if(this.jobStore.)
+    async updateJobExecutionTime(rawJob: RawJob){
+        // 1. check if the job is already running;
+        const activeJobs = await this.jobStore.getActiveJobs()
+        if(activeJobs.some(job => job.id === rawJob.id)){
+            return new Promise((resolve) => resolve())
+        }else {
+            this.jobStore.updateJobExecutionTime(rawJob)
+        }
+        return new Promise((resolve) => resolve())
     }
 
     /**
@@ -178,7 +184,6 @@ export class Queue {
         if (!this.isActive) {
             this.isActive = true;
             this.executedJobs = [];
-
             this.scheduleQueue();
         }
     }

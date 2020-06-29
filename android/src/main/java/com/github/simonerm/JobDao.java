@@ -13,13 +13,16 @@ public interface JobDao {
     @Query("SELECT * FROM job")
     List<Job> getAll();
 
-    @Query("SELECT * FROM job WHERE active == 0 AND failed == '' ORDER BY priority,datetime(created) LIMIT 1")
+    @Query("SELECT * FROM job WHERE active == 0 AND failed == '' ORDER BY priority,datetime(created),datetime(executionTime) desc LIMIT 1")
     Job getNextJob();
 
-    @Query("SELECT * FROM job WHERE active == 0 AND failed == '' ORDER BY priority,datetime(created)")
+    @Query("SELECT * FROM job WHERE active == 0 AND failed == '' ORDER BY priority,datetime(created),datetime(executionTime) desc")
     List<Job> getJobs();
 
-    @Query("SELECT * FROM job WHERE active == 0 AND failed == '' AND worker_name == :workerName ORDER BY priority,datetime(created) LIMIT :limit")
+    @Query("SELECT * FROM job WHERE active == 1 AND failed == '' ORDER BY priority,datetime(created),datetime(executionTime) desc")
+    List<Job> getActiveJobs();
+
+    @Query("SELECT * FROM job WHERE active == 0 AND failed == '' AND worker_name == :workerName ORDER BY priority,datetime(created),datetime(executionTime) desc LIMIT :limit")
     List<Job> getJobsForWorker(String workerName, int limit);
 
     @Query("SELECT * FROM job where id LIKE  :id")
@@ -30,6 +33,9 @@ public interface JobDao {
 
     @Update
     void update(Job job);
+
+    @Update
+    void updateJobExecutionTime(Job job);
 
     @Insert
     void insert(Job job);

@@ -51,6 +51,16 @@ export class JobStoreMock implements JobStore {
             return job;
         });
     }
+
+    updateJobExecutionTime(rawJob: RawJob): void {
+        this.jobs = this.jobs.map((job) => {
+            if (rawJob.id === job.id) {
+                return rawJob;
+            }
+            return job;
+        });
+    }
+
     removeJob(rawJob: RawJob): void {
         this.jobs = this.jobs.filter((job) => job.id !== rawJob.id);
     }
