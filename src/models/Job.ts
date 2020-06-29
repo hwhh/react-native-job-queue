@@ -10,6 +10,7 @@ export interface Job<P extends object> {
     metaData: string;
     attempts: number;
     created: string;
+    executionTime: string;
     failed: string;
     timeout: number;
     priority: number;
@@ -25,6 +26,7 @@ export interface RawJob {
     metaData: string;
     attempts: number;
     created: string;
+    executionTime: string;
     failed: string;
     timeout: number;
     priority: number;

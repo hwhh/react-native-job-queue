@@ -166,6 +166,11 @@ export class Queue {
         }
     }
 
+    updateJob(rawJob: RawJob){
+        //1. check if the job is already running;
+        if(this.jobStore.)
+    }
+
     /**
      * starts the queue to execute queued jobs
      */
@@ -268,6 +273,8 @@ export class Queue {
         }
         return [];
     }
+
+
 
     private excuteJob = async (rawJob: RawJob) => {
         try {

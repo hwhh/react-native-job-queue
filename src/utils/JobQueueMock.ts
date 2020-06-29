@@ -11,6 +11,11 @@ export class JobStoreMock implements JobStore {
     getJobs(): Promise<RawJob[]> {
         return new Promise((resolve) => resolve(this.jobs));
     }
+
+    getActiveJobs(): Promise<RawJob[]> {
+        return new Promise((resolve) => resolve(this.jobs.filter((job) => job.active)));
+    }
+
     getNextJob(): Promise<RawJob> {
         // "SELECT * FROM job WHERE active == 0 AND failed == '' ORDER BY priority,datetime(created) LIMIT 1"
         const filtered = this.jobs.filter((job) => job.active === 0 && job.failed === '');
@@ -26,7 +31,13 @@ export class JobStoreMock implements JobStore {
             }
             return 1;
         });
-        return new Promise((resolve) => resolve(sortedByDate[0] || {}));
+        const sortByExecutionTime = sortedByDate.sort((a, b) => {
+            if (new Date(a.executionTime).getTime() > new Date(b.executionTime).getTime()) {
+                return -1;
+            }
+            return 1;
+        });
+        return new Promise((resolve) => resolve(sortByExecutionTime[0] || {}));
     }
     getJobsForWorker(name: string, count: number): Promise<RawJob[]> {
         const filtered = this.jobs.filter((job) => job.workerName === name);
