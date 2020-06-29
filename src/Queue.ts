@@ -184,11 +184,11 @@ export class Queue {
         // 1. check if the job is already running;
         const activeJobs = await this.jobStore.getActiveJobs()
         if (activeJobs.some(job => job.id === rawJob.id)) {
-            return new Promise((resolve) => resolve())
+            return false;
         } else {
             this.jobStore.updateJobExecutionTime(rawJob)
+            return true
         }
-        return new Promise((resolve) => resolve())
     }
 
     /**
