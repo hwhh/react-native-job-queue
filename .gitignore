@@ -444,3 +444,4 @@ website/i18n/*
 android/.idea/codeStyles/
 android/.idea/jarRepositories.xml
 ios/JobQueue.xcworkspace/xcshareddata/
+yarn.lock
