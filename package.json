@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SimonErm/react-native-job-queue.git",
-    "baseUrl": "https://github.com/SimonErm/react-native-job-queue"
+    "url": "git+https://github.com/hwhh/react-native-job-queue.git",
+    "baseUrl": "https://github.com/hwhh/react-native-job-queue"
   },
   "keywords": [
     "react-native"
   ],
   "author": {
-    "name": "Simon",
-    "email": "simon_ermler@web.de"
+    "name": "Henry",
+    "email": "henryhargreaves@live.co.uk"
   },
   "license": "MIT",
   "licenseFilename": "LICENSE",
