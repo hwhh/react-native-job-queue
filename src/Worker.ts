@@ -1,4 +1,4 @@
-import { Job, RawJob } from './models/Job';
+import {Job, RawJob} from './models/Job';
 
 export interface WorkerOptions<P extends object> {
     onStart?: (job: Job<P>) => void;
@@ -7,6 +7,7 @@ export interface WorkerOptions<P extends object> {
     onCompletion?: (job: Job<P>) => void;
     concurrency?: number;
 }
+
 /**
  * @typeparam P specifies the Type of the Job-Payload.
  */
@@ -31,10 +32,14 @@ export class Worker<P extends object> {
      */
     constructor(name: string, executer: (payload: P) => Promise<any>, options: WorkerOptions<P> = {}) {
         const {
-            onStart = (job: Job<P>) => {},
-            onSuccess = (job: Job<P>) => {},
-            onFailure = (job: Job<P>, error: Error) => {},
-            onCompletion = (job: Job<P>) => {},
+            onStart = (job: Job<P>) => {
+            },
+            onSuccess = (job: Job<P>) => {
+            },
+            onFailure = (job: Job<P>, error: Error) => {
+            },
+            onCompletion = (job: Job<P>) => {
+            },
             concurrency = 5
         } = options;
 
@@ -56,26 +61,33 @@ export class Worker<P extends object> {
     get isBusy() {
         return this.executionCount === this.concurrency;
     }
+
     /**
      * @returns amount of available Executers for current worker
      */
     get availableExecuters() {
         return this.concurrency - this.executionCount;
     }
+
     /**
      * This method should not be invoked manually and is used by the queue to execute jobs
      * @param job to be executed
      */
     async execute(rawJob: RawJob) {
-        const { timeout } = rawJob;
+        const {timeout} = rawJob;
         const payload: P = JSON.parse(rawJob.payload);
-        const job = { ...rawJob, ...{ payload } };
+        const job = {...rawJob, ...{payload}};
         this.executionCount++;
         try {
             this.onStart(job);
             if (timeout > 0) {
                 await this.executeWithTimeout(job, timeout);
-            } else {
+            }
+            // else if (timeout === -1) {
+            //     const derivedTimeout = new Date(job.executionTime).getTime()  - new Date().getTime()
+            //     await this.executeWithTimeout(job, derivedTimeout);
+            // }
+            else {
                 await this.executer(payload);
             }
             this.onSuccess(job);
@@ -87,6 +99,7 @@ export class Worker<P extends object> {
             this.onCompletion(job);
         }
     }
+
     private async executeWithTimeout(job: Job<P>, timeout: number) {
         const timeoutPromise = new Promise((resolve, reject) => {
             setTimeout(() => {

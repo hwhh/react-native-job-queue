@@ -4,6 +4,7 @@ import {FALSE, Job, RawJob} from './models/Job';
 import {JobStore} from './models/JobStore';
 import {Uuid} from './utils/Uuid';
 import {Worker} from './Worker';
+import BackgroundTimer from 'react-native-background-timer';
 
 /**
  * Options to configure the queue
@@ -210,7 +211,13 @@ export class Queue {
     }
 
     private scheduleQueue() {
-        this.timeoutId = setTimeout(this.runQueue, this.updateInterval);
+        if (this.isActive) {
+            BackgroundTimer.runBackgroundTimer(() => {
+                    this.timeoutId = setTimeout(this.runQueue, this.updateInterval);
+                },
+                3000);
+        }
+        BackgroundTimer.stopBackgroundTimer();
     }
 
     private runQueue = async () => {
@@ -219,16 +226,19 @@ export class Queue {
             return;
         }
         const nextJob = await this.jobStore.getNextJob();
-        console.log('nextJob: ', nextJob)
         if (this.isJobNotEmpty(nextJob)) {
-            const nextJobs = await this.getJobsForWorker(nextJob.workerName);
-            const processingJobs = nextJobs.map(async (job) => this.limitExecution(this.excuteJob, job));
-            await Promise.all(processingJobs);
+            if (nextJob.executionTime !== '' && new Date().getTime() >= new Date(nextJob.executionTime).getTime()) {
+                const nextJobs = await this.getJobsForWorker(nextJob.workerName);
+                const processingJobs = nextJobs.map(async (job) => this.limitExecution(this.excuteJob, job));
+                await Promise.all(processingJobs);
+            } else if (nextJob.executionTime !== '' && new Date().getTime() < new Date(nextJob.executionTime).getTime()) {
+                this.updateInterval = new Date(nextJob.executionTime).getTime() - new Date().getTime();
+            }
         } else if (!this.isExecuting()) {
             this.finishQueue();
             return;
         }
-        this.scheduleQueue();
+        // this.scheduleQueue();
     };
 
     private isJobNotEmpty(rawJob: RawJob | {}) {
