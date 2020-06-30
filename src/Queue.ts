@@ -152,11 +152,11 @@ export class Queue {
             attempts: 0,
             timeout: 0,
             priority: 0,
-            executionTime: new Date(new Date().getTime() + 30000).toISOString()
+            executionTime: ''
         },
         startQueue: boolean = true
     ) {
-        const {attempts = 0, timeout = 0, priority = 0, executionTime} = options;
+        const {attempts = 0, timeout = 0, priority = 0, executionTime = ''} = options;
         const job: RawJob = {
             id: Uuid.v4(),
             payload: JSON.stringify(payload || {}),
@@ -221,7 +221,7 @@ export class Queue {
         const nextJob = await this.jobStore.getNextJob();
         console.log('here:', nextJob)
         if (this.isJobNotEmpty(nextJob)) {
-            if(nextJob.executionTime !== '' && new Date().getTime() >= new Date(nextJob.executionTime).getTime()) {
+            if(nextJob.executionTime !== '' || new Date().getTime() >= new Date(nextJob.executionTime).getTime()) {
                 console.log('here2: ', nextJob)
                 const nextJobs = await this.getJobsForWorker(nextJob.workerName);
                 const processingJobs = nextJobs.map(async (job) => this.limitExecution(this.excuteJob, job));
