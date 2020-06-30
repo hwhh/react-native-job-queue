@@ -60,7 +60,5 @@
       "typescript"
     ]
   },
-  "dependencies": {
-    "react-native-background-timer": "^2.2.0"
-  }
+  "dependencies": {}
 }

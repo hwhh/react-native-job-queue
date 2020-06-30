@@ -113,7 +113,7 @@ extension SQLiteDatabase {
         return mapColumnsToJob(sqlStatement: queryStatement)
     }
     func getNextJob() -> Job? {
-        let querySql = "SELECT * FROM job WHERE active == 0 AND failed == '' ORDER BY priority,datetime(created),datetime(executionTime) desc LIMIT "
+        let querySql = "SELECT * FROM job WHERE active == 0 AND failed == '' ORDER BY priority,datetime(created),datetime(executionTime) desc LIMIT 1;"
         guard let queryStatement = try? prepareStatement(sql: querySql) else {
             return nil
         }
