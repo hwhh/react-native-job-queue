@@ -21,9 +21,9 @@ public class JobQueue:NSObject{
         } catch {
             print("Unable to open database. Verify that you created the directory described in the Getting Started section.")
         }
-        
+
     }
-    
+
     @objc
     public func addJob(_ job:[String:Any]){
         if(db != nil){
@@ -34,7 +34,7 @@ public class JobQueue:NSObject{
             }
         }
     }
-    
+
     @objc
     public func removeJob(_ job:[String:Any]){
         if(db != nil){
@@ -65,7 +65,19 @@ public class JobQueue:NSObject{
             }
         }
     }
-    
+
+    @objc
+   public func updateJobExecutionTime(_ job:[String:Any]){
+       if(db != nil){
+           do{
+               try db?.updateJobExecutionTime(job: Job.createJobFromDictionary(job: job))
+           }catch{
+               print("Couln't update job Job to Database: ",error)
+           }
+       }
+   }
+
+
     @objc
     public func getNextJob(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock){
         if(db != nil){
@@ -74,10 +86,10 @@ public class JobQueue:NSObject{
             }else{
                 resolve([String:Any]())
             }
-            
+
         }
     }
-    
+
     @objc
     public func getJobsForWorker(_ name:String, count:Int, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock){
         if(db != nil){
@@ -92,16 +104,16 @@ public class JobQueue:NSObject{
                     }catch{
                         print("Couln't update job Job to Database: ",error)
                     }
-                    
+
                 }
                 resolve(jobsAsDictionaryArray)
             }else{
                 resolve([[String:Any]]())
             }
-            
+
         }
     }
-    
+
     @objc
     public func getJobs(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock){
         if(db != nil){
@@ -114,9 +126,26 @@ public class JobQueue:NSObject{
             }else{
                 resolve([[String:Any]]())
             }
-            
+
         }
     }
+
+    @objc
+       public func getActiveJobs(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock){
+           if(db != nil){
+               if let jobs =  db?.getActiveJobs(){
+                   var jobsAsDictionaryArray=[[String:Any]]()
+                   for job in jobs{
+                       jobsAsDictionaryArray.append(job.toDictionary())
+                   }
+                   resolve(jobsAsDictionaryArray)
+               }else{
+                   resolve([[String:Any]]())
+               }
+
+           }
+       }
+
     @objc static func requiresMainQueueSetup() -> Bool {
         return false
     }

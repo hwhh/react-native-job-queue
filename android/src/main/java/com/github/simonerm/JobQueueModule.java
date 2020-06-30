@@ -38,6 +38,12 @@ public class JobQueueModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void updateJobExecutionTime(ReadableMap job) {
+        JobDao dao = JobDatabase.getAppDatabase(this.reactContext).jobDao();
+        dao.updateJobExecutionTime(ConversionHelper.getJobFromReadableMap(job));
+    }
+
+    @ReactMethod
     public void removeJob(ReadableMap job) {
         JobDao dao = JobDatabase.getAppDatabase(this.reactContext).jobDao();
         dao.delete(ConversionHelper.getJobFromReadableMap(job));
@@ -59,8 +65,15 @@ public class JobQueueModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getJobs(Promise promise) {
         JobDao dao = JobDatabase.getAppDatabase(this.reactContext).jobDao();
-
         List<Job> jobs=dao.getJobs();
+        promise.resolve(ConversionHelper.getJobsAsWritableArray(jobs));
+    }
+
+
+    @ReactMethod
+    public void getActiveJobs(Promise promise) {
+        JobDao dao = JobDatabase.getAppDatabase(this.reactContext).jobDao();
+        List<Job> jobs=dao.getActiveJobs();
         promise.resolve(ConversionHelper.getJobsAsWritableArray(jobs));
     }
 

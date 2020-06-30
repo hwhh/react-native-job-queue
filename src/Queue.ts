@@ -1,9 +1,9 @@
-import { NativeModules } from 'react-native';
+import {NativeModules} from 'react-native';
 
-import { FALSE, Job, RawJob } from './models/Job';
-import { JobStore } from './models/JobStore';
-import { Uuid } from './utils/Uuid';
-import { Worker } from './Worker';
+import {FALSE, Job, RawJob} from './models/Job';
+import {JobStore} from './models/JobStore';
+import {Uuid} from './utils/Uuid';
+import {Worker} from './Worker';
 
 /**
  * Options to configure the queue
@@ -20,6 +20,7 @@ export interface QueueOptions {
     updateInterval?: number;
     concurrency?: number;
 }
+
 /**
  * ## Usage
  *
@@ -48,18 +49,21 @@ export class Queue {
             return this.queueInstance;
         }
     }
+
     /**
      * @returns true if the Queue is running and false otherwise
      */
     get isRunning() {
         return this.isActive;
     }
+
     /**
      * @returns the workers map (readonly)
      */
     get registeredWorkers() {
         return this.workers;
     }
+
     private static queueInstance: Queue | null;
 
     private jobStore: JobStore;
@@ -86,9 +90,11 @@ export class Queue {
         this.activeJobCount = 0;
 
         this.updateInterval = 10;
-        this.onQueueFinish = (executedJobs: Array<Job<any>>) => {};
+        this.onQueueFinish = (executedJobs: Array<Job<any>>) => {
+        };
         this.concurrency = -1;
     }
+
     /**
      * @returns a promise that resolves all jobs that are queued and not active
      */
@@ -98,7 +104,8 @@ export class Queue {
 
     configure(options: QueueOptions) {
         const {
-            onQueueFinish = (executedJobs: Array<Job<any>>) => {},
+            onQueueFinish = (executedJobs: Array<Job<any>>) => {
+            },
             updateInterval = 10,
             concurrency = -1
         } = options;
@@ -106,6 +113,7 @@ export class Queue {
         this.updateInterval = updateInterval;
         this.concurrency = concurrency;
     }
+
     /**
      * adds a [[Worker]] to the queue which can execute Jobs
      * @param worker
@@ -140,16 +148,22 @@ export class Queue {
     addJob<P extends object>(
         workerName: string,
         payload: P,
-        options = { attempts: 0, timeout: 0, priority: 0 },
+        options = {
+            attempts: 0,
+            timeout: 0,
+            priority: 0,
+            executionTime: new Date(new Date().getTime() + 30000).toISOString()
+        },
         startQueue: boolean = true
     ) {
-        const { attempts = 0, timeout = 0, priority = 0 } = options;
+        const {attempts = 0, timeout = 0, priority = 0, executionTime} = options;
         const job: RawJob = {
             id: Uuid.v4(),
             payload: JSON.stringify(payload || {}),
-            metaData: JSON.stringify({ faileAttempts: 0, errors: [] }),
+            metaData: JSON.stringify({faileAttempts: 0, errors: []}),
             active: FALSE,
             created: new Date().toISOString(),
+            executionTime,
             failed: '',
             workerName,
             attempts,
@@ -166,6 +180,17 @@ export class Queue {
         }
     }
 
+    async updateJobExecutionTime(rawJob: RawJob) {
+        // 1. check if the job is already running;
+        const activeJobs = await this.jobStore.getActiveJobs()
+        if (activeJobs.some(job => job.id === rawJob.id)) {
+            return false;
+        } else {
+            this.jobStore.updateJobExecutionTime(rawJob)
+            return true
+        }
+    }
+
     /**
      * starts the queue to execute queued jobs
      */
@@ -177,15 +202,18 @@ export class Queue {
             this.scheduleQueue();
         }
     }
+
     /**
      * stop the queue from executing queued jobs
      */
     stop() {
         this.isActive = false;
     }
+
     private scheduleQueue() {
         this.timeoutId = setTimeout(this.runQueue, this.updateInterval);
     }
+
     private runQueue = async () => {
         if (!this.isActive) {
             this.finishQueue();
@@ -193,9 +221,11 @@ export class Queue {
         }
         const nextJob = await this.jobStore.getNextJob();
         if (this.isJobNotEmpty(nextJob)) {
-            const nextJobs = await this.getJobsForWorker(nextJob.workerName);
-            const processingJobs = nextJobs.map(async (job) => this.limitExecution(this.excuteJob, job));
-            await Promise.all(processingJobs);
+            if(nextJob.executionTime === '' || new Date().getTime() >= new Date(nextJob.executionTime).getTime()) {
+                const nextJobs = await this.getJobsForWorker(nextJob.workerName);
+                const processingJobs = nextJobs.map(async (job) => this.limitExecution(this.excuteJob, job));
+                await Promise.all(processingJobs);
+            }
         } else if (!this.isExecuting()) {
             this.finishQueue();
             return;
@@ -233,9 +263,11 @@ export class Queue {
             }
         }
     };
+
     private isExecuterAvailable() {
         return this.concurrency <= 0 || this.activeJobCount < this.concurrency;
     }
+
     private isExecuting() {
         return this.activeJobCount > 0;
     }
@@ -247,7 +279,7 @@ export class Queue {
     }
 
     private async getJobsForWorker(workerName: string) {
-        const { isBusy, availableExecuters } = this.workers[workerName];
+        const {isBusy, availableExecuters} = this.workers[workerName];
         if (!isBusy) {
             return await this.jobStore.getJobsForWorker(workerName, availableExecuters);
         } else {
@@ -257,7 +289,7 @@ export class Queue {
 
     private async getJobsForAlternateWorker() {
         for (const workerName of Object.keys(this.workers)) {
-            const { isBusy, availableExecuters } = this.workers[workerName];
+            const {isBusy, availableExecuters} = this.workers[workerName];
             let nextJobs: RawJob[] = [];
             if (!isBusy) {
                 nextJobs = await this.jobStore.getJobsForWorker(workerName, availableExecuters);
@@ -278,20 +310,21 @@ export class Queue {
             await this.workers[rawJob.workerName].execute(rawJob);
             this.jobStore.removeJob(rawJob);
         } catch (error) {
-            const { attempts } = rawJob;
+            const {attempts} = rawJob;
             // tslint:disable-next-line: prefer-const
-            let { errors, failedAttempts } = JSON.parse(rawJob.metaData);
+            let {errors, failedAttempts} = JSON.parse(rawJob.metaData);
             failedAttempts++;
             let failed = '';
             if (failedAttempts > attempts) {
                 failed = new Date().toISOString();
             }
-            const metaData = JSON.stringify({ errors: [...errors, error], failedAttempts });
-            this.jobStore.updateJob({ ...rawJob, ...{ active: FALSE, metaData, failed } });
+            const metaData = JSON.stringify({errors: [...errors, error], failedAttempts});
+            this.jobStore.updateJob({...rawJob, ...{active: FALSE, metaData, failed}});
         } finally {
             this.executedJobs.push(rawJob);
             this.activeJobCount--;
         }
     };
 }
+
 export default Queue.instance;

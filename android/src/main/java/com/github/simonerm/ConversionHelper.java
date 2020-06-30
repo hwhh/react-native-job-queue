@@ -38,6 +38,7 @@ public class ConversionHelper {
         job.setTimeout(jobAsMap.getInt("timeout"));
         job.setPriority(jobAsMap.getInt("priority"));
         job.setCreated(jobAsMap.getString("created"));
+        job.setExecutionTime(jobAsMap.getString("executionTime"));
         job.setFailed(jobAsMap.getString("failed"));
         return job;
     }
@@ -52,6 +53,7 @@ public class ConversionHelper {
         jobAsBundle.putInt("timeout",job.getTimeout());
         jobAsBundle.putInt("priority",job.getPriority());
         jobAsBundle.putString("created",job.getCreated());
+        jobAsBundle.putString("executionTime",job.getExecutionTime());
         jobAsBundle.putString("failed",job.getFailed());
         return  jobAsBundle;
     }
