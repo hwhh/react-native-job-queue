@@ -83,10 +83,6 @@ export class Worker<P extends object> {
             if (timeout > 0) {
                 await this.executeWithTimeout(job, timeout);
             }
-            // else if (timeout === -1) {
-            //     const derivedTimeout = new Date(job.executionTime).getTime()  - new Date().getTime()
-            //     await this.executeWithTimeout(job, derivedTimeout);
-            // }
             else {
                 await this.executer(payload);
             }
